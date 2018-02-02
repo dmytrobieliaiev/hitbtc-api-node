@@ -69,14 +69,14 @@ export default class HitBTC {
       ...params,
     })
 
-  requestTrading = (endpoint, method, params = {}) => {
+  requestTrading = (endpoint, method, params = {}, apiVersion = 1) => {
     if (!this.key || !this.secret) {
       throw new Error(
         `API key and secret key required to use authenticated methods`,
       );
     }
 
-    const path = `/api/1/trading${endpoint}`;
+    const path = apiVersion === 2 ? `/api/2/account${endpoint}` : `/api/1/trading${endpoint}`;
 
     // All requests include these
     const authParams = {
@@ -105,8 +105,10 @@ export default class HitBTC {
       .update(message)
       .digest(`hex`);
 
+    const authHeader = new Buffer(`${this.key}:${this.secret}`).toString('base64');
     const config = {
       headers: {
+        'Authorization': `Basic ${authHeader}`,
         'X-Signature': signature,
       },
     };
@@ -165,4 +167,13 @@ export default class HitBTC {
       sort: `desc`,
       ...params,
     });
+
+  withdraw = (params = {}) => {
+    return new Promise((resolve, reject) => {
+      this.requestTrading(`/crypto/withdraw`, `post`, params, 2)
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
 }

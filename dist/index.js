@@ -79,12 +79,12 @@ class HitBTC {
       format_item: `object`
     }, params));
 
-    this.requestTrading = (endpoint, method, params = {}) => {
+    this.requestTrading = (endpoint, method, params = {}, apiVersion = 1) => {
       if (!this.key || !this.secret) {
         throw new Error(`API key and secret key required to use authenticated methods`);
       }
 
-      const path = `/api/1/trading${endpoint}`;
+      const path = apiVersion === 2 ? `/api/2/account${endpoint}` : `/api/1/trading${endpoint}`;
 
       // All requests include these
       const authParams = {
@@ -103,8 +103,10 @@ class HitBTC {
 
       const signature = _crypto2.default.createHmac(`sha512`, this.secret).update(message).digest(`hex`);
 
+      const authHeader = new Buffer(`${this.key}:${this.secret}`).toString('base64');
       const config = {
         headers: {
+          'Authorization': `Basic ${authHeader}`,
           'X-Signature': signature
         }
       };
@@ -144,6 +146,12 @@ class HitBTC {
       start_index: 0,
       sort: `desc`
     }, params));
+
+    this.withdraw = (params = {}) => {
+      return new Promise((resolve, reject) => {
+        this.requestTrading(`/crypto/withdraw`, `post`, params, 2).then(resolve).catch(reject);
+      });
+    };
 
     this.key = key;
     this.secret = secret;
