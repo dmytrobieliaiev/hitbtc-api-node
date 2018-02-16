@@ -1,23 +1,7 @@
 import WebsocketClient from './websocketClient';
 import axios from 'axios';
-import crypto from 'crypto';
 import get from 'lodash/fp/get';
-import keyBy from 'lodash/fp/keyBy';
-import map from 'lodash/fp/map';
-import mapValues from 'lodash/fp/mapValues';
-import shortid from 'shortid';
 import { stringify } from 'qs';
-
-// Convert order book entries to a more convenient format
-const labelOrderBookEntries = mapValues(
-  map(([price, volume]) => ({ price, volume })),
-);
-
-// Ditto for the balance data
-const formatBalanceData = mapValues(keyBy(get(`currency_code`)));
-
-const uri = (path, params) =>
-  `${path}?${stringify(params)}`;
 
 export default class HitBTC {
   static WebsocketClient = WebsocketClient;
@@ -27,7 +11,7 @@ export default class HitBTC {
     this.secret = secret;
     const subdomain = isDemo ? `demo-api` : `api`;
     this.baseUrl = `http://${subdomain}.hitbtc.com`;
-    this.url = `${this.baseUrl}/api/1`;
+    this.url = `${this.baseUrl}/api/2`;
   }
 
   requestPublic = (endpoint, params = {}) =>
@@ -35,145 +19,108 @@ export default class HitBTC {
       .then(get(`data`))
       .catch(get(`response.data`));
 
-  getTimestamp = () =>
-    this.requestPublic(`/time`);
-
-  getSymbols = () =>
-    this.requestPublic(`/symbols`);
-
-  getTicker = symbol =>
-    this.requestPublic(`/${symbol}/ticker`);
-
-  getAllTickers = () =>
-    this.requestPublic(`/ticker`);
-
-  getOrderBook = symbol =>
-    this.requestPublic(`/${symbol}/orderbook`, {
-      format_amount: `number`,
-      format_price: `number`,
-    })
-    .then(labelOrderBookEntries);
-
-  getTrades = (symbol, params = {}) =>
-    this.requestPublic(`/${symbol}/trades`, {
-      format_amount: `number`,
-      format_item: `object`,
-      format_price: `number`,
-      ...params,
-    })
-
-  getRecentTrades = (symbol, params = {}) =>
-    this.requestPublic(`/${symbol}/trades/recent`, {
-      max_results: 100,
-      format_item: `object`,
-      ...params,
-    })
-
-  requestTrading = (endpoint, method, params = {}, apiVersion = 1) => {
+  requestPrivate = (endpoint, params = {}, method = `post`) => {
     if (!this.key || !this.secret) {
       throw new Error(
         `API key and secret key required to use authenticated methods`,
       );
     }
 
-    const path = apiVersion === 2 ? `/api/2/account${endpoint}` : `/api/1/trading${endpoint}`;
-
-    // All requests include these
-    const authParams = {
-      apikey: this.key,
-      nonce: Date.now(),
-    };
-
-    // If this is a GET request, all params go in the URL.
-    // Otherwise, only the auth-related ones do.
-    const requestPath = uri(path,
-      method === `get` ?
-        { ...authParams, ...params } :
-        authParams,
-    );
-
-    const requestUrl = `${this.baseUrl}${requestPath}`;
-
-    // Compute the message to encrypt for the signature.
-    const message =
-      method === `get` ?
-        requestPath :
-        `${requestPath}${stringify(params)}`;
-
-    const signature = crypto
-      .createHmac(`sha512`, this.secret)
-      .update(message)
-      .digest(`hex`);
-
-    const authHeader = new Buffer(`${this.key}:${this.secret}`).toString('base64');
     const config = {
-      headers: {
-        'Authorization': `Basic ${authHeader}`,
-        'X-Signature': signature,
+      auth: {
+        username: this.key,
+        password: this.secret,
       },
     };
 
-    // Figure out the arguments to pass to axios.
     const args =
       method === `get` ?
         [config] :
         [stringify(params), config];
 
-    return axios[method](requestUrl, ...args)
+    return axios[method](`${this.url}${endpoint}`, ...args)
       .then(get(`data`))
       .catch(get(`response.data`));
   }
 
-  getMyBalance = () =>
-    this.requestTrading(`/balance`, `get`, {})
-      .then(formatBalanceData);
+  currencies = () =>
+    this.requestPublic(`/currency`);
 
-  getMyActiveOrders = (params = {}) =>
-    this.requestTrading(`/orders/active`, `get`, params);
+  currency = curr =>
+    this.requestPublic(`/currency/${curr}`);
 
-  placeOrder = (params = {}) =>
-    this.requestTrading(`/new_order`, `post`, {
-      clientOrderId: shortid(),
-      ...params,
-    });
+  symbols = () =>
+    this.requestPublic(`/symbol`);
 
-  cancelOrder = (params = {}) =>
-    this.requestTrading(`/cancel_order`, `post`, {
-      cancelRequestClientOrderId: shortid(),
-      ...params,
-    });
+  symbol = sym =>
+    this.requestPublic(`/symbol/${sym}`);
 
-  cancelAllOrders = (params = {}) =>
-    this.requestTrading(`/cancel_orders`, `post`, params);
+  tickers = () =>
+    this.requestPublic(`/ticker`);
 
-  getMyRecentOrders = (params = {}) =>
-    this.requestTrading(`/orders/recent`, `get`, {
-      max_results: 100,
-      sort: `desc`,
-      ...params,
-    });
+  ticker = symbol =>
+    this.requestPublic(`/ticker/${symbol}`);
 
-  getMyOrder = (params = {}) =>
-    this.requestTrading(`/order`, `get`, params);
+  trades = (symbol, params) =>
+    this.requestPublic(`/trades/${symbol}`, params);
 
-  getMyTradesByOrder = (params = {}) =>
-    this.requestTrading(`/trades/by/order`, `get`, params);
+  orderbook = (symbol, { limit }) =>
+    this.requestPublic(`/orderbook/${symbol}`, { limit });
 
-  getAllMyTrades = (params = {}) =>
-    this.requestTrading(`/trades`, `get`, {
-      by: `trade_id`,
-      max_results: 100,
-      start_index: 0,
-      sort: `desc`,
-      ...params,
-    });
+  candles = (symbol, { limit, period }) =>
+    this.requestPublic(`/candles/${symbol}`, { limit, period });
 
-  withdraw = (params = {}) => {
-    return new Promise((resolve, reject) => {
-      this.requestTrading(`/crypto/withdraw`, `post`, params, 2)
-        .then(resolve)
-        .catch(reject);
-    });
-  }
+  tradingBalance = () =>
+    this.requestPrivate(`/trading/balance`, {}, `get`);
 
+  getOrders = () =>
+    this.requestPrivate(`/order`, {}, `get`);
+
+  getOrder = clientOrderId =>
+    this.requestPrivate(`/order/${clientOrderId}`, {}, `get`);
+
+  newOrder = params =>
+    this.requestPrivate(`/order`, params);
+
+  editOrder = (clientOrderId, params) =>
+    this.requestPrivate(`/order/${clientOrderId}`, params, `put`);
+
+  cancelOrders = ({ symbol }) =>
+    this.requestPrivate(`/order`, { symbol }, `delete`);
+
+  cancelOrder = clientOrderId =>
+    this.requestPrivate(`/order/${clientOrderId}`, {}, `delete`);
+
+  fee = symbol =>
+    this.requestPrivate(`/trading/fee/${symbol}`, {}, `get`);
+
+  orderHistory = params =>
+    this.requestPrivate(`/history/order`, params, `get`);
+
+  tradesHistory = params =>
+    this.requestPrivate(`/history/trades`, params, `get`);
+
+  tradesByOrder = orderId =>
+    this.requestPrivate(`/history/order/${orderId}/trades`, {}, `get`);
+
+  accountBalance = () =>
+    this.requestPrivate(`/account/balance`, {}, `get`);
+
+  getCryptoAddress = currency =>
+    this.requestPrivate(`/account/crypto/address/${currency}`, {}, `get`);
+
+  newCryptoAddress = currency =>
+    this.requestPrivate(`/account/crypto/address/${currency}`);
+
+  withdraw = params =>
+    this.requestPrivate(`/account/crypto/withdraw`, params);
+
+  transfer = ({ currency, amount, type }) =>
+    this.requestPrivate(`/account/transfer`, { currency, amount, type });
+
+  transactions = params =>
+    this.requestPrivate(`/account/transactions`, params, `get`);
+
+  transaction = (id, params) =>
+    this.requestPrivate(`/account/transactions/${id}`, params, `get`)
 }
