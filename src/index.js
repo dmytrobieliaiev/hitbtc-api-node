@@ -34,7 +34,7 @@ export default class HitBTC {
     };
 
     const args =
-      method === `get` ?
+      method === `get` || method === `delete` ?
         [config] :
         [stringify(params), config];
 
@@ -64,10 +64,10 @@ export default class HitBTC {
   trades = (symbol, params) =>
     this.requestPublic(`/trades/${symbol}`, params);
 
-  orderbook = (symbol, { limit }) =>
+  orderbook = (symbol, { limit } = {}) =>
     this.requestPublic(`/orderbook/${symbol}`, { limit });
 
-  candles = (symbol, { limit, period }) =>
+  candles = (symbol, { limit, period } = {}) =>
     this.requestPublic(`/candles/${symbol}`, { limit, period });
 
   tradingBalance = () =>
@@ -85,7 +85,7 @@ export default class HitBTC {
   editOrder = (clientOrderId, params) =>
     this.requestPrivate(`/order/${clientOrderId}`, params, `put`);
 
-  cancelOrders = ({ symbol }) =>
+  cancelOrders = ({ symbol } = {}) =>
     this.requestPrivate(`/order`, { symbol }, `delete`);
 
   cancelOrder = clientOrderId =>

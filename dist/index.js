@@ -37,7 +37,7 @@ class HitBTC {
         }
       };
 
-      const args = method === `get` ? [config] : [(0, _qs.stringify)(params), config];
+      const args = method === `get` || method === `delete` ? [config] : [(0, _qs.stringify)(params), config];
 
       return _axios2.default[method](`${this.url}${endpoint}`, ...args).then((0, _get2.default)(`data`)).catch((0, _get2.default)(`response.data`));
     };
@@ -56,9 +56,9 @@ class HitBTC {
 
     this.trades = (symbol, params) => this.requestPublic(`/trades/${symbol}`, params);
 
-    this.orderbook = (symbol, { limit }) => this.requestPublic(`/orderbook/${symbol}`, { limit });
+    this.orderbook = (symbol, { limit } = {}) => this.requestPublic(`/orderbook/${symbol}`, { limit });
 
-    this.candles = (symbol, { limit, period }) => this.requestPublic(`/candles/${symbol}`, { limit, period });
+    this.candles = (symbol, { limit, period } = {}) => this.requestPublic(`/candles/${symbol}`, { limit, period });
 
     this.tradingBalance = () => this.requestPrivate(`/trading/balance`, {}, `get`);
 
@@ -70,7 +70,7 @@ class HitBTC {
 
     this.editOrder = (clientOrderId, params) => this.requestPrivate(`/order/${clientOrderId}`, params, `put`);
 
-    this.cancelOrders = ({ symbol }) => this.requestPrivate(`/order`, { symbol }, `delete`);
+    this.cancelOrders = ({ symbol } = {}) => this.requestPrivate(`/order`, { symbol }, `delete`);
 
     this.cancelOrder = clientOrderId => this.requestPrivate(`/order/${clientOrderId}`, {}, `delete`);
 
