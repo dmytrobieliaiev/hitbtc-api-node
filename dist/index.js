@@ -23,7 +23,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 class HitBTC {
 
   constructor({ key, secret, isDemo = false } = { isDemo: false }) {
-    this.requestPublic = (endpoint, params = {}) => _axios2.default.get(`${this.url}/public${endpoint}`, { params }).then((0, _get2.default)(`data`)).catch((0, _get2.default)(`response.data`));
+    this.requestPublic = (endpoint, params = {}) => _axios2.default.get(`${this.url}/public${endpoint}`, { params }).then((0, _get2.default)(`data`)).catch(err => {
+      throw (0, _get2.default)(`response.data`, err);
+    });
 
     this.requestPrivate = (endpoint, params = {}, method = `post`) => {
       if (!this.key || !this.secret) {
@@ -39,7 +41,9 @@ class HitBTC {
 
       const args = method === `get` || method === `delete` ? [config] : [(0, _qs.stringify)(params), config];
 
-      return _axios2.default[method](`${this.url}${endpoint}`, ...args).then((0, _get2.default)(`data`)).catch((0, _get2.default)(`response.data`));
+      return _axios2.default[method](`${this.url}${endpoint}`, ...args).then((0, _get2.default)(`data`)).catch(err => {
+        throw (0, _get2.default)(`response.data`, err);
+      });
     };
 
     this.currencies = () => this.requestPublic(`/currency`);
