@@ -17,8 +17,9 @@ export default class HitBTC {
   requestPublic = (endpoint, params = {}) =>
     axios.get(`${this.url}/public${endpoint}`, { params })
       .then(get(`data`))
-      .catch(get(`response.data`));
-
+      .catch(err => {
+        throw get(`response.data`, err);
+      });
   requestPrivate = (endpoint, params = {}, method = `post`) => {
     if (!this.key || !this.secret) {
       throw new Error(
@@ -40,7 +41,9 @@ export default class HitBTC {
 
     return axios[method](`${this.url}${endpoint}`, ...args)
       .then(get(`data`))
-      .catch(get(`response.data`));
+      .catch(err => {
+        throw get(`response.data`, err);
+      });
   }
 
   currencies = () =>
