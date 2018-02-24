@@ -36,7 +36,8 @@ class HitBTC {
         auth: {
           username: this.key,
           password: this.secret
-        }
+        },
+        params
       };
 
       const args = method === `get` || method === `delete` ? [config] : [(0, _qs.stringify)(params), config];

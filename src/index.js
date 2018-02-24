@@ -32,6 +32,7 @@ export default class HitBTC {
         username: this.key,
         password: this.secret,
       },
+      params,
     };
 
     const args =
