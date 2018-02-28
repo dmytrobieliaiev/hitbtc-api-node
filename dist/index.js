@@ -10,7 +10,7 @@ class HitBTC {
             .get(`${this.url}/public${endpoint}`, { params })
             .then(ramda_1.prop(`data`))
             .catch(err => {
-            throw ramda_1.prop(`response.data`, err);
+            throw ramda_1.path(["response", "data"], err);
         });
         this.requestPrivate = (endpoint, params = {}, method = `post`) => {
             if (!this.key || !this.secret) {
@@ -28,7 +28,7 @@ class HitBTC {
                 ? axios_1.default[method](url, config)
                 : axios_1.default[method](url, qs_1.stringify(params), config);
             return result.then(ramda_1.prop(`data`)).catch(err => {
-                throw ramda_1.prop(`response.data`, err);
+                throw ramda_1.path(["response", "data"], err);
             });
         };
         this.currencies = () => this.requestPublic(`/currency`);

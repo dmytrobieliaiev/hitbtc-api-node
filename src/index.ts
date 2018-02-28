@@ -1,6 +1,6 @@
 import axios from "axios";
 import { stringify } from "qs";
-import { prop } from "ramda";
+import { path, prop } from "ramda";
 import {
   HitBTCCandlePeriod,
   HitBTCRESTMethod,
@@ -29,7 +29,7 @@ export default class HitBTC {
       .get(`${this.url}/public${endpoint}`, { params })
       .then(prop(`data`))
       .catch(err => {
-        throw prop(`response.data`, err);
+        throw path(["response", "data"], err);
       })
 
   public requestPrivate = (
@@ -59,7 +59,7 @@ export default class HitBTC {
         : axios[method](url, stringify(params), config);
 
     return result.then(prop(`data`)).catch(err => {
-      throw prop(`response.data`, err);
+      throw path(["response", "data"], err);
     });
   }
 
