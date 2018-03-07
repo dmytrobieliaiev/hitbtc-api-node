@@ -2,10 +2,10 @@ import axios from "axios";
 import { stringify } from "qs";
 import { path, prop } from "ramda";
 import {
-  HitBTCCandlePeriod,
-  HitBTCRESTMethod,
-  IHitBTCOrder,
-  IHitBTCRESTParams,
+  CandlePeriod,
+  IOrder,
+  IRESTParams,
+  RESTMethod,
 } from "./interfaces";
 import WebsocketClient from "./websocketClient";
 
@@ -16,7 +16,7 @@ export default class HitBTC {
   public baseUrl: string;
   public url: string;
 
-  constructor({ key, secret, isDemo = false }: IHitBTCRESTParams) {
+  constructor({ key, secret, isDemo = false }: IRESTParams) {
     this.key = key;
     this.secret = secret;
     const subdomain = isDemo ? `demo-api` : `api`;
@@ -35,7 +35,7 @@ export default class HitBTC {
   public requestPrivate = (
     endpoint: string,
     params = {},
-    method = `post` as HitBTCRESTMethod,
+    method = `post` as RESTMethod,
   ) => {
     if (!this.key || !this.secret) {
       throw new Error(
@@ -83,33 +83,33 @@ export default class HitBTC {
 
   public candles = (
     symbol: string,
-    { limit, period }: { limit: number; period: HitBTCCandlePeriod },
+    { limit, period }: { limit: number; period: CandlePeriod },
   ) => this.requestPublic(`/candles/${symbol}`, { limit, period })
 
   public tradingBalance = () =>
     this.requestPrivate(`/trading/balance`, {}, `get`)
 
-  public getOrders = (): Promise<IHitBTCOrder[]> =>
+  public getOrders = (): Promise<IOrder[]> =>
     this.requestPrivate(`/order`, {}, `get`)
 
-  public getOrder = (clientOrderId: string): Promise<IHitBTCOrder> =>
+  public getOrder = (clientOrderId: string): Promise<IOrder> =>
     this.requestPrivate(`/order/${clientOrderId}`, {}, `get`)
 
-  public newOrder = (params: any): Promise<IHitBTCOrder> =>
+  public newOrder = (params: any): Promise<IOrder> =>
     this.requestPrivate(`/order`, params)
 
   public editOrder = (
     clientOrderId: string,
     params: any,
-  ): Promise<IHitBTCOrder> =>
+  ): Promise<IOrder> =>
     this.requestPrivate(`/order/${clientOrderId}`, params, `put`)
 
   public cancelOrders = (params: {
     symbol?: string;
-  }): Promise<IHitBTCOrder[]> =>
+  }): Promise<IOrder[]> =>
     this.requestPrivate(`/order`, params, `delete`)
 
-  public cancelOrder = (clientOrderId: string): Promise<IHitBTCOrder> =>
+  public cancelOrder = (clientOrderId: string): Promise<IOrder> =>
     this.requestPrivate(`/order/${clientOrderId}`, {}, `delete`)
 
   public fee = (symbol: string) =>

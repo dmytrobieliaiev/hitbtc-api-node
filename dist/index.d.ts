@@ -1,4 +1,4 @@
-import { HitBTCCandlePeriod, HitBTCRESTMethod, IHitBTCOrder, IHitBTCRESTParams } from "./interfaces";
+import { CandlePeriod, IOrder, IRESTParams, RESTMethod } from "./interfaces";
 import WebsocketClient from "./websocketClient";
 export default class HitBTC {
     static WebsocketClient: typeof WebsocketClient;
@@ -6,9 +6,9 @@ export default class HitBTC {
     secret: any;
     baseUrl: string;
     url: string;
-    constructor({key, secret, isDemo}: IHitBTCRESTParams);
+    constructor({key, secret, isDemo}: IRESTParams);
     requestPublic: (endpoint: string, params?: {}) => Promise<any>;
-    requestPrivate: (endpoint: string, params?: {}, method?: HitBTCRESTMethod) => Promise<any>;
+    requestPrivate: (endpoint: string, params?: {}, method?: RESTMethod) => Promise<any>;
     currencies: () => Promise<any>;
     currency: (curr: string) => Promise<any>;
     symbols: () => Promise<any>;
@@ -21,17 +21,17 @@ export default class HitBTC {
     }) => Promise<any>;
     candles: (symbol: string, { limit, period }: {
         limit: number;
-        period: HitBTCCandlePeriod;
+        period: CandlePeriod;
     }) => Promise<any>;
     tradingBalance: () => Promise<any>;
-    getOrders: () => Promise<IHitBTCOrder[]>;
-    getOrder: (clientOrderId: string) => Promise<IHitBTCOrder>;
-    newOrder: (params: any) => Promise<IHitBTCOrder>;
-    editOrder: (clientOrderId: string, params: any) => Promise<IHitBTCOrder>;
+    getOrders: () => Promise<IOrder[]>;
+    getOrder: (clientOrderId: string) => Promise<IOrder>;
+    newOrder: (params: any) => Promise<IOrder>;
+    editOrder: (clientOrderId: string, params: any) => Promise<IOrder>;
     cancelOrders: (params: {
         symbol?: string | undefined;
-    }) => Promise<IHitBTCOrder[]>;
-    cancelOrder: (clientOrderId: string) => Promise<IHitBTCOrder>;
+    }) => Promise<IOrder[]>;
+    cancelOrder: (clientOrderId: string) => Promise<IOrder>;
     fee: (symbol: string) => Promise<any>;
     orderHistory: (params: any) => Promise<any>;
     tradesHistory: (params: any) => Promise<any>;

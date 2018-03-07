@@ -1,32 +1,92 @@
 import { pipe, prop } from "ramda";
 import * as WebSocket from "ws";
 
-export type Listener = (data: IHitBTCWebsocketData) => void;
+export type Listener = (data: IWebsocketData) => void;
 export type EventListener = (...args: any[]) => void;
-export type MessageListener = (event: IWSMessageEvent) => void;
+export type MessageListener = (event: IWebsocketMessageEvent) => void;
 
 const withData = (listener: Listener): MessageListener =>
   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
 
-export interface IHitBTCWebsocketParams {
-  key: string;
-  secret: string;
-  isDemo?: boolean;
+export interface IWebsocketParams {
+  readonly key: string;
+  readonly secret: string;
+  readonly isDemo?: boolean;
 }
 
-export interface IHitBTCWebsocketData {
-  jsonrpc: string;
-  method?: string;
-  params?: any;
-  result?: any;
-  error?: any;
-  id: number | null;
+export type IWebsocketData =
+  | IBaseWebsocketData
+  | IWebsocketBookData
+  | IWebsocketTickerData;
+
+export interface IBaseWebsocketData {
+  readonly jsonrpc: string;
+  readonly method?: string;
+  readonly params?: any;
+  readonly symbol?: string;
+  readonly result?: any;
+  readonly error?: any;
+  readonly id?: number;
 }
 
-export interface IWSMessageEvent {
-  data: any;
-  type: string;
-  target: WebSocket;
+export interface IWebsocketBookData extends IBaseWebsocketData {
+  readonly method: "snapshotOrderbook" | "updateOrderbook";
+  readonly params: IWebsocketBookParams;
+  readonly symbol: string;
+  readonly error: never;
+  readonly result: never;
+  readonly id: never;
+}
+
+export interface IWebsocketBookItem {
+  readonly price: string;
+  readonly size: string;
+}
+
+export interface IWebsocketBookParams {
+  readonly ask: IWebsocketBookItem[];
+  readonly bid: IWebsocketBookItem[];
+}
+
+export interface IWebsocketTickerData extends IBaseWebsocketData {
+  readonly method: "ticker";
+  readonly params: ITickerParams;
+  readonly error: never;
+  readonly result: never;
+  readonly id: never;
+}
+
+export interface ITickerParams {
+  readonly ask: string;
+  readonly bid: string;
+  readonly last: string;
+  readonly open: string;
+  readonly low: string;
+  readonly high: string;
+  readonly volume: string;
+  readonly volumeQuote: string;
+  readonly timestamp: string;
+  readonly symbol: string;
+}
+
+export interface IWebsocketMessageEvent {
+  readonly data: string;
+  readonly type: string;
+  readonly target: WebSocket;
+}
+
+export function isTickerMessage(
+  data: IWebsocketData,
+): data is IWebsocketTickerData {
+  return data.method === "ticker";
+}
+
+export function isOrderbookMessage(
+  data: IWebsocketData,
+): data is IWebsocketBookData {
+  return (
+    data.method === "snapshotOrderbook" || data.method === "updateOrderbook"
+  );
 }
 
 export default class HitBTCWebsocketClient {
@@ -35,7 +95,7 @@ export default class HitBTCWebsocketClient {
   public socket: WebSocket;
   private requestId: number;
   private hasCredentials: boolean;
-  constructor({ key, secret, isDemo = false }: IHitBTCWebsocketParams) {
+  constructor({ key, secret, isDemo = false }: IWebsocketParams) {
     this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
     this.socketUrl = `ws://${this.baseUrl}/api/2/ws`;
     this.hasCredentials = !!(key && secret);
@@ -85,5 +145,4 @@ export default class HitBTCWebsocketClient {
 
   public removeOnOpenListener = (listener: () => void) =>
     this.socket.addEventListener(`open`, listener)
-
 }
