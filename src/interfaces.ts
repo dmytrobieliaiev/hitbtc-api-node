@@ -1,12 +1,12 @@
-export interface IHitBTCRESTParams {
+export interface IRESTParams {
   key: string;
   secret: string;
   isDemo?: boolean;
 }
 
-export type HitBTCRESTMethod = "get" | "put" | "post" | "delete";
+export type RESTMethod = "get" | "put" | "post" | "delete";
 
-export type HitBTCCandlePeriod =
+export type CandlePeriod =
   | "M1"
   | "M3"
   | "M5"
@@ -18,7 +18,7 @@ export type HitBTCCandlePeriod =
   | "D7"
   | "1M";
 
-export type HitBTCStatus =
+export type Status =
   | "new"
   | "suspended"
   | "partiallyFilled"
@@ -29,12 +29,12 @@ export type HitBTCStatus =
 export type TimeInForce = "GTC" | "FOK" | "IOC" | "Day" | "GTD";
 export type Type = "limit" | "market" | "stopLimit" | "stopMarket";
 
-export interface IHitBTCOrder {
+export interface IOrder {
   id: number;
   clientOrderId: string;
   symbol: string;
   side: "buy" | "sell";
-  status: HitBTCStatus;
+  status: Status;
   type: Type;
   timeInForce: TimeInForce;
   quantity: string;

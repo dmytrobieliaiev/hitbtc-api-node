@@ -3,6 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ramda_1 = require("ramda");
 const WebSocket = require("ws");
 const withData = (listener) => ramda_1.pipe(ramda_1.prop("data"), (data) => JSON.parse(data), listener);
+function isTickerMessage(data) {
+    return data.method === "ticker";
+}
+exports.isTickerMessage = isTickerMessage;
+function isOrderbookMessage(data) {
+    return (data.method === "snapshotOrderbook" || data.method === "updateOrderbook");
+}
+exports.isOrderbookMessage = isOrderbookMessage;
 class HitBTCWebsocketClient {
     constructor({ key, secret, isDemo = false }) {
         this.createRequest = (method, params = {}) => {
