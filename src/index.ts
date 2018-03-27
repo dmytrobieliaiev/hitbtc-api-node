@@ -20,7 +20,7 @@ export default class HitBTC {
     this.key = key;
     this.secret = secret;
     const subdomain = isDemo ? `demo-api` : `api`;
-    this.baseUrl = `http://${subdomain}.hitbtc.com`;
+    this.baseUrl = `https://${subdomain}.hitbtc.com`;
     this.url = `${this.baseUrl}/api/2`;
   }
 
