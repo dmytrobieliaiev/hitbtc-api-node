@@ -97,7 +97,7 @@ export default class HitBTCWebsocketClient {
   private hasCredentials: boolean;
   constructor({ key, secret, isDemo = false }: IWebsocketParams) {
     this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
-    this.socketUrl = `ws://${this.baseUrl}/api/2/ws`;
+    this.socketUrl = `wss://${this.baseUrl}/api/2/ws`;
     this.hasCredentials = !!(key && secret);
 
     this.socket = new WebSocket(this.socketUrl);

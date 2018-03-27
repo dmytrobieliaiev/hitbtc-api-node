@@ -30,7 +30,7 @@ class HitBTCWebsocketClient {
         this.addOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
         this.removeOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
         this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
-        this.socketUrl = `ws://${this.baseUrl}/api/2/ws`;
+        this.socketUrl = `wss://${this.baseUrl}/api/2/ws`;
         this.hasCredentials = !!(key && secret);
         this.socket = new WebSocket(this.socketUrl);
         this.requestId = 0;
