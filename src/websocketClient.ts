@@ -27,6 +27,7 @@ export interface IBaseWebsocketData {
   readonly result?: any;
   readonly error?: any;
   readonly id?: number;
+  readonly sequence?: number;
 }
 
 export interface IWebsocketBookData extends IBaseWebsocketData {
@@ -36,6 +37,7 @@ export interface IWebsocketBookData extends IBaseWebsocketData {
   readonly error: never;
   readonly result: never;
   readonly id: never;
+  readonly sequence: number;
 }
 
 export interface IWebsocketBookItem {
