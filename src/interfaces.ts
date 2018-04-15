@@ -29,6 +29,14 @@ export type Status =
 export type TimeInForce = "GTC" | "FOK" | "IOC" | "Day" | "GTD";
 export type Type = "limit" | "market" | "stopLimit" | "stopMarket";
 
+export interface ITradesReport {
+  fee: string;
+  id: number;
+  price: string;
+  quantity: string;
+  timestamp: string;
+}
+
 export interface IOrder {
   id: number;
   clientOrderId: string;
@@ -42,4 +50,5 @@ export interface IOrder {
   cumQuantity: string;
   createdAt: string;
   updatedAt: string;
+  tradesReport?: ITradesReport[];
 }
