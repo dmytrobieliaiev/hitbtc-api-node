@@ -8,6 +8,13 @@ export declare type CandlePeriod = "M1" | "M3" | "M5" | "M15" | "M30" | "H1" | "
 export declare type Status = "new" | "suspended" | "partiallyFilled" | "filled" | "canceled" | "expired";
 export declare type TimeInForce = "GTC" | "FOK" | "IOC" | "Day" | "GTD";
 export declare type Type = "limit" | "market" | "stopLimit" | "stopMarket";
+export interface ITradesReport {
+    fee: string;
+    id: number;
+    price: string;
+    quantity: string;
+    timestamp: string;
+}
 export interface IOrder {
     id: number;
     clientOrderId: string;
@@ -21,4 +28,5 @@ export interface IOrder {
     cumQuantity: string;
     createdAt: string;
     updatedAt: string;
+    tradesReport?: ITradesReport[];
 }

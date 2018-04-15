@@ -13,7 +13,6 @@ export interface IBaseWebsocketData {
     readonly jsonrpc: string;
     readonly method?: string;
     readonly params?: any;
-    readonly symbol?: string;
     readonly result?: any;
     readonly error?: any;
     readonly id?: number;
@@ -21,7 +20,6 @@ export interface IBaseWebsocketData {
 export interface IWebsocketBookData extends IBaseWebsocketData {
     readonly method: "snapshotOrderbook" | "updateOrderbook";
     readonly params: IWebsocketBookParams;
-    readonly symbol: string;
     readonly error: never;
     readonly result: never;
     readonly id: never;
@@ -33,6 +31,8 @@ export interface IWebsocketBookItem {
 export interface IWebsocketBookParams {
     readonly ask: IWebsocketBookItem[];
     readonly bid: IWebsocketBookItem[];
+    readonly sequence: number;
+    readonly symbol: string;
 }
 export interface IWebsocketTickerData extends IBaseWebsocketData {
     readonly method: "ticker";
