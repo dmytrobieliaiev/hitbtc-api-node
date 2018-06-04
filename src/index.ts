@@ -23,7 +23,7 @@ export default class HitBTC {
       this.baseUrl = baseUrl;
     } else {
       const subdomain = isDemo ? `demo-api` : `api`;
-      this.baseUrl = `https://${subdomain}.hitbtc.com/api/v2`;
+      this.baseUrl = `https://${subdomain}.hitbtc.com/api/2`;
     }
   }
 

@@ -16,11 +16,11 @@ chai.use(chaiAsPromised);
 const index_1 = require("./index");
 ava_1.test("uses the demo domain when isDemo", () => __awaiter(this, void 0, void 0, function* () {
     const client = new index_1.default({ key: "key", secret: "secret", isDemo: true });
-    client.baseUrl.should.equal("https://demo-api.hitbtc.com/api/v2");
+    client.baseUrl.should.equal("https://demo-api.hitbtc.com/api/2");
 }));
 ava_1.test("uses the production domain when not isDemo", () => __awaiter(this, void 0, void 0, function* () {
     const client = new index_1.default({ key: "key", secret: "secret", isDemo: false });
-    client.baseUrl.should.equal("https://api.hitbtc.com/api/v2");
+    client.baseUrl.should.equal("https://api.hitbtc.com/api/2");
 }));
 ava_1.test("uses the passed baseUrl when provided", () => __awaiter(this, void 0, void 0, function* () {
     const client = new index_1.default({ key: "key", secret: "secret", baseUrl: "http://localhost:4499/hitbtc/api" });

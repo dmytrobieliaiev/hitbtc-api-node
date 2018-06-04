@@ -5,7 +5,7 @@ export default class HitBTC {
     key: any;
     secret: any;
     baseUrl: string;
-    constructor({key, secret, isDemo, baseUrl}: IRESTParams);
+    constructor({ key, secret, isDemo, baseUrl }: IRESTParams);
     requestPublic: (endpoint: string, params?: {}) => Promise<any>;
     requestPrivate: (endpoint: string, params?: {}, method?: RESTMethod) => Promise<any>;
     currencies: () => Promise<any>;
