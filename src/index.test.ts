@@ -9,13 +9,13 @@ import HitBTC from './index';
 test("uses the demo domain when isDemo", async () => {
   const client = new HitBTC({ key: "key", secret: "secret", isDemo: true });
 
-  client.baseUrl.should.equal("https://demo-api.hitbtc.com/api/v2");
+  client.baseUrl.should.equal("https://demo-api.hitbtc.com/api/2");
 });
 
 test("uses the production domain when not isDemo", async () => {
   const client = new HitBTC({ key: "key", secret: "secret", isDemo: false });
 
-  client.baseUrl.should.equal("https://api.hitbtc.com/api/v2");
+  client.baseUrl.should.equal("https://api.hitbtc.com/api/2");
 });
 
 test("uses the passed baseUrl when provided", async () => {

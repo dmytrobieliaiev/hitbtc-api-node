@@ -1,4 +1,3 @@
-/// <reference types="ws" />
 import * as WebSocket from "ws";
 export declare type Listener = (data: IWebsocketData) => void;
 export declare type EventListener = (...args: any[]) => void;
@@ -65,7 +64,7 @@ export default class HitBTCWebsocketClient {
     baseUrl: string;
     socket: WebSocket;
     private requestId;
-    constructor({key, secret, isDemo, baseUrl}: IWebsocketParams);
+    constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
     createRequest: (method: string, params?: {}) => string;
     sendRequest: (method: string, params: any) => void;
     addListener: (listener: Listener) => void;
