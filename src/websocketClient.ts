@@ -1,9 +1,11 @@
 import { pipe, prop } from "ramda";
-import * as WebSocket from "ws";
+import * as ReconnectingWS from "reconnecting-websocket";
+import ReconnectingWebsocket from "reconnecting-websocket";
+import * as WS from "ws";
 
 export type Listener = (data: IWebsocketData) => void;
 export type EventListener = (...args: any[]) => void;
-export type MessageListener = (event: IWebsocketMessageEvent) => void;
+export type MessageListener = (event: MessageEvent) => void;
 
 const withData = (listener: Listener): MessageListener =>
   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
@@ -92,7 +94,7 @@ export function isOrderbookMessage(
 
 export default class HitBTCWebsocketClient {
   public baseUrl: string;
-  public socket: WebSocket;
+  public socket: ReconnectingWebsocket;
   private requestId: number;
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
@@ -105,11 +107,13 @@ export default class HitBTCWebsocketClient {
 
     const hasCredentials = !!(key && secret);
 
-
     this.requestId = 0;
 
     if (hasCredentials) {
-      this.socket = new WebSocket(this.baseUrl);
+      const ReconnectingWebsocket: any = ReconnectingWS;
+      this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
+        WebSocket: WS,
+      });
 
       this.addOnOpenListener(() => {
         this.sendRequest(`login`, {
@@ -140,10 +144,10 @@ export default class HitBTCWebsocketClient {
   public removeListener = (listener: Listener) =>
     this.socket.removeEventListener(`message`, withData(listener))
 
-  public addEventListener = (event: string, listener: EventListener) =>
+  public addEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
     this.socket.addEventListener(event, listener)
 
-  public removeEventListener = (event: string, listener: EventListener) =>
+  public removeEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
     this.socket.removeEventListener(event, listener)
 
   public addOnOpenListener = (listener: () => void) =>
