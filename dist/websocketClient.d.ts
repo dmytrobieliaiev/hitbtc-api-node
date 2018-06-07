@@ -1,7 +1,7 @@
-import * as WebSocket from "ws";
+import ReconnectingWebsocket from "reconnecting-websocket";
 export declare type Listener = (data: IWebsocketData) => void;
 export declare type EventListener = (...args: any[]) => void;
-export declare type MessageListener = (event: IWebsocketMessageEvent) => void;
+export declare type MessageListener = (event: MessageEvent) => void;
 export interface IWebsocketParams {
     readonly key: string;
     readonly secret: string;
@@ -62,15 +62,15 @@ export declare function isTickerMessage(data: IWebsocketData): data is IWebsocke
 export declare function isOrderbookMessage(data: IWebsocketData): data is IWebsocketBookData;
 export default class HitBTCWebsocketClient {
     baseUrl: string;
-    socket: WebSocket;
+    socket: ReconnectingWebsocket;
     private requestId;
     constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
     createRequest: (method: string, params?: {}) => string;
     sendRequest: (method: string, params: any) => void;
     addListener: (listener: Listener) => void;
     removeListener: (listener: Listener) => void;
-    addEventListener: (event: string, listener: EventListener) => void;
-    removeEventListener: (event: string, listener: EventListener) => void;
+    addEventListener: (event: "error" | "message" | "close" | "open", listener: EventListener) => void;
+    removeEventListener: (event: "error" | "message" | "close" | "open", listener: EventListener) => void;
     addOnOpenListener: (listener: () => void) => void;
     removeOnOpenListener: (listener: () => void) => void;
 }

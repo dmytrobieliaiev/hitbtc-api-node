@@ -44,6 +44,7 @@
     "lodash": "^4.17.4",
     "qs": "^6.4.0",
     "ramda": "^0.25.0",
+    "reconnecting-websocket": "^4.0.0-rc5",
     "shortid": "^2.2.8",
     "typescript": "^2.7.2",
     "ws": "^2.2.3"

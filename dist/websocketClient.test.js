@@ -14,6 +14,7 @@ const chaiAsPromised = require("chai-as-promised");
 require("chai/register-should");
 chai.use(chaiAsPromised);
 const websocketClient_1 = require("./websocketClient");
+const ReconnectingWebSocket = require("reconnecting-websocket");
 ava_1.test("uses the demo domain when isDemo", () => __awaiter(this, void 0, void 0, function* () {
     const client = new websocketClient_1.default({ key: "", secret: "", isDemo: true });
     client.baseUrl.should.equal("wss://demo-api.hitbtc.com/api/2/ws");
@@ -25,5 +26,10 @@ ava_1.test("uses the production domain when not isDemo", () => __awaiter(this, v
 ava_1.test("uses the passed baseUrl when provided", () => __awaiter(this, void 0, void 0, function* () {
     const client = new websocketClient_1.default({ key: "", secret: "", baseUrl: "wss://localhost:4499/hitbtc/wss" });
     client.baseUrl.should.equal("wss://localhost:4499/hitbtc/wss");
+}));
+ava_1.test("ReconnectingWebsocket instance is created and available", () => __awaiter(this, void 0, void 0, function* () {
+    const client = new websocketClient_1.default({ key: "DFgdfg", secret: "sdfsdfsdf" });
+    client.socket.should.be.instanceOf(ReconnectingWebSocket);
+    client.socket.readyState.should.equal(0);
 }));
 //# sourceMappingURL=websocketClient.test.js.map
