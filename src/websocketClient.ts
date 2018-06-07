@@ -72,12 +72,6 @@ export interface ITickerParams {
   readonly symbol: string;
 }
 
-export interface IWebsocketMessageEvent {
-  readonly data: string;
-  readonly type: string;
-  readonly target: WebSocket;
-}
-
 export function isTickerMessage(
   data: IWebsocketData,
 ): data is IWebsocketTickerData {
