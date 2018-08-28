@@ -30,6 +30,61 @@ class HitBTCWebsocketClient {
         this.removeEventListener = (event, listener) => this.socket.removeEventListener(event, listener);
         this.addOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
         this.removeOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
+        // Custom code
+        // Lets define some callbacks
+        // TODO: Aggregate output to reduce waste rendering cycles
+        // * Combine orderbooks by symbol ( see subscriptions )
+        // * Send orderbooks back each 1 seconds
+        this.bindCallbacks = (callbacks) => {
+            this.addListener((data) => {
+                const isError = (data && data.error);
+                const method = data && data.method;
+                const params = data && data.params;
+                if (isError && callbacks.onError) {
+                    callbacks.onError(JSON.stringify(data.error));
+                }
+                switch (method) {
+                    case 'updateOrderbook':
+                        if (callbacks.onOrderBook) {
+                            callbacks.onOrderBook(params);
+                        }
+                        break;
+                    case 'snapshotOrderbook':
+                        if (callbacks.onOrderBook) {
+                            callbacks.onOrderBook(params);
+                        }
+                        break;
+                    case 'snapshotTrades':
+                        if (callbacks.onTrades) {
+                            callbacks.onTrades(params);
+                        }
+                        break;
+                    case 'updateTrades':
+                        if (callbacks.onTrades) {
+                            callbacks.onTrades(params);
+                        }
+                        break;
+                    case 'ticker':
+                        if (callbacks.onTicker) {
+                            callbacks.onTicker(params);
+                        }
+                        break;
+                    case 'activeOrders':
+                        if (callbacks.onActiveOrders) {
+                            callbacks.onActiveOrders(params);
+                        }
+                        break;
+                    case 'report':
+                        if (callbacks.onOrder) {
+                            callbacks.onOrder(params);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+        };
+        this.subscriptions = [];
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }
@@ -52,6 +107,23 @@ class HitBTCWebsocketClient {
                 });
             });
         }
+    }
+    subscribeMarkets(pairs) {
+        pairs.map(symbol => {
+            this.subscriptions.push(symbol);
+            this.sendRequest('subscribeOrderbook', { symbol }); // deltas
+            this.sendRequest('subscribeTrades', { symbol });
+        });
+        this.subscriptions = ramda_1.uniq(this.subscriptions);
+    }
+    subscribeTicker(pairs) {
+        pairs.map(symbol => this.sendRequest('subscribeTicker', { symbol }));
+    }
+    unsubscribeMarkets(pairs) {
+        pairs.map(symbol => this.sendRequest('unsubscribeOrderbook', { symbol }));
+    }
+    subscribeOrders() {
+        this.sendRequest('subscribeReports', {});
     }
 }
 exports.default = HitBTCWebsocketClient;

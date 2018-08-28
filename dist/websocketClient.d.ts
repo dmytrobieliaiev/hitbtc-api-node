@@ -2,6 +2,14 @@ import ReconnectingWebsocket from "reconnecting-websocket";
 export declare type Listener = (data: IWebsocketData) => void;
 export declare type EventListener = (...args: any[]) => void;
 export declare type MessageListener = (event: MessageEvent) => void;
+interface ICallbacks {
+    onOrderBook?: Function;
+    onOrder?: Function;
+    onTicker?: Function;
+    onTrades?: Function;
+    onActiveOrders?: Function;
+    onError?: Function;
+}
 export interface IWebsocketParams {
     readonly key: string;
     readonly secret: string;
@@ -53,15 +61,11 @@ export interface ITickerParams {
     readonly timestamp: string;
     readonly symbol: string;
 }
-export interface IWebsocketMessageEvent {
-    readonly data: string;
-    readonly type: string;
-    readonly target: WebSocket;
-}
 export declare function isTickerMessage(data: IWebsocketData): data is IWebsocketTickerData;
 export declare function isOrderbookMessage(data: IWebsocketData): data is IWebsocketBookData;
 export default class HitBTCWebsocketClient {
     baseUrl: string;
+    subscriptions: string[];
     socket: ReconnectingWebsocket;
     private requestId;
     constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
@@ -73,4 +77,10 @@ export default class HitBTCWebsocketClient {
     removeEventListener: (event: "error" | "message" | "close" | "open", listener: EventListener) => void;
     addOnOpenListener: (listener: () => void) => void;
     removeOnOpenListener: (listener: () => void) => void;
+    bindCallbacks: (callbacks: ICallbacks) => void;
+    subscribeMarkets(pairs: string[]): void;
+    subscribeTicker(pairs: string[]): void;
+    unsubscribeMarkets(pairs: string[]): void;
+    subscribeOrders(): void;
 }
+export {};

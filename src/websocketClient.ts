@@ -1,4 +1,4 @@
-import { pipe, prop } from "ramda";
+import { pipe, prop, uniq } from "ramda";
 import * as ReconnectingWS from "reconnecting-websocket";
 import ReconnectingWebsocket from "reconnecting-websocket";
 import * as WS from "ws";
@@ -10,6 +10,14 @@ export type MessageListener = (event: MessageEvent) => void;
 const withData = (listener: Listener): MessageListener =>
   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
 
+interface ICallbacks {
+  onOrderBook?: Function;
+  onOrder?: Function;
+  onTicker?: Function;
+  onTrades?: Function;
+  onActiveOrders?: Function;
+  onError?: Function;
+}
 export interface IWebsocketParams {
   readonly key: string;
   readonly secret: string;
@@ -88,10 +96,12 @@ export function isOrderbookMessage(
 
 export default class HitBTCWebsocketClient {
   public baseUrl: string;
+  public subscriptions: string[];
   public socket: ReconnectingWebsocket;
   private requestId: number;
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
+    this.subscriptions = [];
     if (baseUrl) {
       this.baseUrl = baseUrl;
     } else {
@@ -149,4 +159,76 @@ export default class HitBTCWebsocketClient {
 
   public removeOnOpenListener = (listener: () => void) =>
     this.socket.addEventListener(`open`, listener)
+  
+  // Custom code
+  // Lets define some callbacks
+  // TODO: Aggregate output to reduce waste rendering cycles
+  // * Combine orderbooks by symbol ( see subscriptions )
+  // * Send orderbooks back each 1 seconds
+  public bindCallbacks = (callbacks: ICallbacks) => {
+    this.addListener((data) => {
+      const isError = (data && data.error);
+      const method = data && data.method;
+      const params = data && data.params;
+      if (isError && callbacks.onError) {
+        callbacks.onError(JSON.stringify(data.error));
+      }
+      switch (method) {
+        case 'updateOrderbook':
+          if (callbacks.onOrderBook) {
+            callbacks.onOrderBook(params);
+          }
+          break;
+        case 'snapshotOrderbook':
+          if (callbacks.onOrderBook) {
+            callbacks.onOrderBook(params);
+          }
+          break;
+        case 'snapshotTrades':
+          if (callbacks.onTrades) {
+            callbacks.onTrades(params);
+          }
+          break;
+        case 'updateTrades':
+          if (callbacks.onTrades) {
+            callbacks.onTrades(params);
+          }
+          break;
+        case 'ticker':
+          if (callbacks.onTicker) {
+            callbacks.onTicker(params);
+          }
+          break;
+        case 'activeOrders':
+          if (callbacks.onActiveOrders) {
+            callbacks.onActiveOrders(params);
+          }
+          break;
+        case 'report':
+          if (callbacks.onOrder) {
+            callbacks.onOrder(params);
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  }
+  public subscribeMarkets(pairs: string[]) {
+    pairs.map(symbol => {
+      this.subscriptions.push(symbol);
+      this.sendRequest('subscribeOrderbook', { symbol }); // deltas
+      this.sendRequest('subscribeTrades', { symbol });
+    });
+    this.subscriptions = uniq(this.subscriptions);
+  }
+  public subscribeTicker(pairs: string[]) {
+    pairs.map(symbol => this.sendRequest('subscribeTicker', { symbol }));
+  }
+  public unsubscribeMarkets(pairs: string[]) {
+    pairs.map(symbol => this.sendRequest('unsubscribeOrderbook', { symbol }));
+  }
+  public subscribeOrders() {
+    this.sendRequest('subscribeReports', {});
+  }
 }
