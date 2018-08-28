@@ -1,8 +1,5 @@
 # hitbtc-api
-
-## Warning -- Outdated README
-
-HitBTC API wrapper for Node.js
+I've compared forks of hitbtc-api-node and found FluxCoin/hitbtc-api-node which was the best at the moment, as I needed few features to add I've decided to fork. Readme is fixed too.
 
 ## Installation
 
@@ -17,63 +14,44 @@ Clients for both the [REST API](https://hitbtc.com/api#restful) and
 methods as indicated in the docs require authentication with an API key and
 secret key.
 
-### Example usage:
+## So how does it work?
+```
+const HitBTC = require('hitbtc-api').default;
+const key = '';
+const secret = '';
 
-```javascript
-import HitBTC from 'hitbtc-api';
+const client = new HitBTC({ key, secret });
+const websocketClient = new HitBTC.WebsocketClient({ key, secret });
 
-const restClient = new HitBTC({ key, secret, isDemo: false });
-const websocketClient =
-  new HitBTC.WebsocketClient({ key, secret, isDemo: false });
+// Lets create a new delayed call
+// If we call after .constructor than it won't work, because login has no callback in this implementation
+// to be done: onReady event
+setTimeout(() => {
+    websocketClient.addListener((data) => {
+        // Check here for event type like snapshot or something 
+        // This is smartest part of your code
+        console.log(data);
+    });
+    
+    // Send requests and receive result at the top
+    websocketClient.sendRequest('subscribeOrderbook', { symbol: "ETHBTC" });
+    websocketClient.sendRequest('subscribeOrderbook', { symbol: "ETHADA" });
+    websocketClient.sendRequest('getSymbol', { symbol: "ETHBTC" });
+}, 3000);
 
-restClient.getOrderBook('BTCUSD')
-  .then(console.log)
-  .catch(console.error);
-
-websocketClient.addMarketMessageListener(data => {
-  if (data.MarketDataSnapshotFullRefresh) console.log(data);
-});
-
-// The methods are bound properly, so feel free to destructure them:
-const { getMyBalance } = restClient;
-getMyBalance()
-  .then(({ balance }) => console.log(
-    `My USD balance is ${balance.USD.cash}!`
-  ))
 ```
 
-## API
-
-### REST
-All methods return promises.
-* getTimestamp()
-* getSymbols()
-* getTicker(symbol)
-* getAllTickers()
-* getOrderBook(symbol)
-* getTrades(symbol, params = {})
-* getRecentTrades(symbol, params = {})
-* getMyBalance()
-* getMyActiveOrders(params = {})
-* placeOrder(params = {})
-* cancelOrder(params = {})
-* cancelAllOrders(params = {})
-* getMyRecentOrders(params = {})
-* getMyOrder(params = {})
-* getMyTradesByOrder(params = {})
-* getAllMyTrades(params = {})
-
 ### WebSocket
-* addMarketMessageListener(listener)
-* addTradingMessageListener(listener)
-* removeMarketMessageListener(listener)
-* removeTradingMessageListener(listener)
-* addMarketListener(event, listener)
-* addTradingListener(event, listener)
-* removeMarketListener(event, listener)
-* removeTradingListener(event, listener)
+* .sendRequest
+* .addListener ( json callback)
+* .removeListener
+* .addEventListener ( same as addListener but with raw socket response)
+* .removeEventListener 
+* .addOnOpenListener ( used by login)
+* .removeOnOpenListener
 
 ## To Do
+* new level of abstraction
 * Tests
 * Improved documentation
 * More robust error handling
