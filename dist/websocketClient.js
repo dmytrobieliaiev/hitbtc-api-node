@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const RWSocket = require('reconnecting-websocket');
+const ReconnectingWebSocket = require('reconnecting-websocket');
 const ramda_1 = require("ramda");
 const WS = require("ws");
 const withData = (listener) => ramda_1.pipe(ramda_1.prop("data"), (data) => JSON.parse(data), listener);
@@ -102,7 +102,7 @@ class HitBTCWebsocketClient {
         const hasCredentials = !!(key && secret);
         this.requestId = 0;
         if (hasCredentials) {
-            this.socket = new RWSocket(this.baseUrl, undefined, {
+            this.socket = new ReconnectingWebSocket(this.baseUrl, undefined, {
                 WebSocket: WS,
             });
             this.addOnOpenListener(() => {
