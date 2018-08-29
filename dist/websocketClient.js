@@ -32,9 +32,6 @@ class HitBTCWebsocketClient {
         this.removeOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
         // Custom code
         // Lets define some callbacks
-        // TODO: Aggregate output to reduce waste rendering cycles
-        // * Combine orderbooks by symbol ( see subscriptions )
-        // * Send orderbooks back each 1 seconds
         this.bindCallbacks = (callbacks) => {
             this.addListener((data) => {
                 const isError = (data && data.error);
@@ -42,6 +39,15 @@ class HitBTCWebsocketClient {
                 const params = data && data.params;
                 if (isError && callbacks.onError) {
                     callbacks.onError(JSON.stringify(data.error));
+                }
+                if (callbacks.onReady) {
+                    this.responseId += 1;
+                    if (this.responseId === 1) {
+                        callbacks.onReady();
+                    }
+                    if (this.responseId + 1 === Number.MAX_SAFE_INTEGER) {
+                        this.responseId = 2;
+                    }
                 }
                 switch (method) {
                     case 'updateOrderbook':
@@ -85,6 +91,7 @@ class HitBTCWebsocketClient {
             });
         };
         this.subscriptions = [];
+        this.responseId = 0;
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }

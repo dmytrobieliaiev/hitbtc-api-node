@@ -17,7 +17,9 @@ interface ICallbacks {
   onTrades?: Function;
   onActiveOrders?: Function;
   onError?: Function;
+  onReady?: Function;
 }
+
 export interface IWebsocketParams {
   readonly key: string;
   readonly secret: string;
@@ -99,9 +101,12 @@ export default class HitBTCWebsocketClient {
   public subscriptions: string[];
   public socket: ReconnectingWebsocket;
   private requestId: number;
+  private responseId: number;
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
     this.subscriptions = [];
+    this.responseId = 0;
+
     if (baseUrl) {
       this.baseUrl = baseUrl;
     } else {
@@ -162,9 +167,6 @@ export default class HitBTCWebsocketClient {
   
   // Custom code
   // Lets define some callbacks
-  // TODO: Aggregate output to reduce waste rendering cycles
-  // * Combine orderbooks by symbol ( see subscriptions )
-  // * Send orderbooks back each 1 seconds
   public bindCallbacks = (callbacks: ICallbacks) => {
     this.addListener((data) => {
       const isError = (data && data.error);
@@ -172,6 +174,15 @@ export default class HitBTCWebsocketClient {
       const params = data && data.params;
       if (isError && callbacks.onError) {
         callbacks.onError(JSON.stringify(data.error));
+      }
+      if (callbacks.onReady) {
+        this.responseId += 1;
+        if (this.responseId === 1){
+          callbacks.onReady();
+        }
+        if (this.responseId + 1 === Number.MAX_SAFE_INTEGER) {
+          this.responseId = 2;
+        }
       }
       switch (method) {
         case 'updateOrderbook':

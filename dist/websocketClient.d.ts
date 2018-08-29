@@ -9,6 +9,7 @@ interface ICallbacks {
     onTrades?: Function;
     onActiveOrders?: Function;
     onError?: Function;
+    onReady?: Function;
 }
 export interface IWebsocketParams {
     readonly key: string;
@@ -68,6 +69,7 @@ export default class HitBTCWebsocketClient {
     subscriptions: string[];
     socket: ReconnectingWebsocket;
     private requestId;
+    private responseId;
     constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
     createRequest: (method: string, params?: {}) => string;
     sendRequest: (method: string, params: any) => void;
