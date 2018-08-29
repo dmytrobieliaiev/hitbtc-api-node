@@ -1,5 +1,5 @@
+const RWSocket = require('reconnecting-websocket');
 import { pipe, prop, uniq } from "ramda";
-import * as ReconnectingWS from "reconnecting-websocket";
 import ReconnectingWebsocket from "reconnecting-websocket";
 import * as WS from "ws";
 
@@ -119,8 +119,7 @@ export default class HitBTCWebsocketClient {
     this.requestId = 0;
 
     if (hasCredentials) {
-      const ReconnectingWebsocket: any = ReconnectingWS;
-      this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
+      this.socket = new RWSocket(this.baseUrl, undefined, {
         WebSocket: WS,
       });
 
