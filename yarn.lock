@@ -240,6 +240,10 @@ async-each@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
 
+async-limiter@~1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -2666,6 +2670,12 @@ node-pre-gyp@^0.6.29:
     tar "^2.2.1"
     tar-pack "^3.4.0"
 
+node-reconnect-ws@^0.2.5:
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/node-reconnect-ws/-/node-reconnect-ws-0.2.5.tgz#baad6e99b78e9da22a226d43cf78e9ac354b6c0d"
+  dependencies:
+    ws "^4.0.0"
+
 nodemon@^1.11.0:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.11.0.tgz#226c562bd2a7b13d3d7518b49ad4828a3623d06c"
@@ -3161,10 +3171,6 @@ readdirp@^2.0.0:
     minimatch "^3.0.2"
     readable-stream "^2.0.2"
     set-immediate-shim "^1.0.1"
-
-reconnecting-websocket@^4.0.0-rc5:
-  version "4.0.0-rc5"
-  resolved "https://registry.yarnpkg.com/reconnecting-websocket/-/reconnecting-websocket-4.0.0-rc5.tgz#d6b5eb1d3c263ffa70fa4d4c3bf95bebe373ea5b"
 
 redent@^1.0.0:
   version "1.0.0"
@@ -3989,6 +3995,13 @@ ws@^2.2.3:
   dependencies:
     safe-buffer "~5.0.1"
     ultron "~1.1.0"
+
+ws@^4.0.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-4.1.0.tgz#a979b5d7d4da68bf54efe0408967c324869a7289"
+  dependencies:
+    async-limiter "~1.0.0"
+    safe-buffer "~5.1.0"
 
 xdg-basedir@^2.0.0:
   version "2.0.0"

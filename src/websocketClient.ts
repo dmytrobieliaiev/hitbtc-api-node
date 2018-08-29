@@ -1,14 +1,13 @@
-import { pipe, prop, uniq } from "ramda";
-import * as ReconnectingWS from "reconnecting-websocket";
-import ReconnectingWebsocket from "reconnecting-websocket";
-import * as WS from "ws";
+import { uniq } from "ramda";
+const nodeReconnectWs = require('node-reconnect-ws');
 
 export type Listener = (data: IWebsocketData) => void;
 export type EventListener = (...args: any[]) => void;
 export type MessageListener = (event: MessageEvent) => void;
 
-const withData = (listener: Listener): MessageListener =>
-  pipe(prop("data"), (data: string) => JSON.parse(data), listener);
+// const withData = (listener: Listener): MessageListener => 
+//   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
+  
 
 interface ICallbacks {
   onOrderBook?: Function;
@@ -18,6 +17,10 @@ interface ICallbacks {
   onActiveOrders?: Function;
   onError?: Function;
   onReady?: Function;
+}
+interface ISocket {
+  on: Function;
+  send: Function;
 }
 
 export interface IWebsocketParams {
@@ -99,7 +102,7 @@ export function isOrderbookMessage(
 export default class HitBTCWebsocketClient {
   public baseUrl: string;
   public subscriptions: string[];
-  public socket: ReconnectingWebsocket;
+  public socket: ISocket;
   private requestId: number;
   private responseId: number;
 
@@ -119,12 +122,14 @@ export default class HitBTCWebsocketClient {
     this.requestId = 0;
 
     if (hasCredentials) {
-      const ReconnectingWebsocket: any = ReconnectingWS;
-      this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
-        WebSocket: WS,
+      this.socket = new nodeReconnectWs({
+        url: this.baseUrl,
+        protocol: [],
+        reconnectInterval: 4000,
+        autoConnect: true,
+        maxRetries: Infinity,
       });
-
-      this.addOnOpenListener(() => {
+      this.socket.on('open', () => {
         this.sendRequest(`login`, {
           algo: `BASIC`,
           pKey: key,
@@ -148,22 +153,22 @@ export default class HitBTCWebsocketClient {
     this.socket.send(this.createRequest(method, params))
 
   public addListener = (listener: Listener) =>
-    this.socket.addEventListener(`message`, withData(listener))
+    this.socket.on(`message`, (data: string) => listener(JSON.parse(data)));
 
-  public removeListener = (listener: Listener) =>
-    this.socket.removeEventListener(`message`, withData(listener))
+  // public removeListener = (listener: Listener) =>
+  //   this.socket.removeEventListener(`message`, withData(listener))
 
   public addEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
-    this.socket.addEventListener(event, listener)
+    this.socket.on(event, listener)
 
-  public removeEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
-    this.socket.removeEventListener(event, listener)
+  // public removeEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
+    // this.socket.removeEventListener(event, listener)
 
   public addOnOpenListener = (listener: () => void) =>
-    this.socket.addEventListener(`open`, listener)
+    this.socket.on(`open`, listener)
 
-  public removeOnOpenListener = (listener: () => void) =>
-    this.socket.addEventListener(`open`, listener)
+  // public removeOnOpenListener = (listener: () => void) =>
+  //   this.socket.off(`open`, listener)
   
   // Custom code
   // Lets define some callbacks

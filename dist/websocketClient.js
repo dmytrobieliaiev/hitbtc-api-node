@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const ramda_1 = require("ramda");
-const ReconnectingWS = require("reconnecting-websocket");
-const WS = require("ws");
-const withData = (listener) => ramda_1.pipe(ramda_1.prop("data"), (data) => JSON.parse(data), listener);
+const nodeReconnectWs = require('node-reconnect-ws');
 function isTickerMessage(data) {
     return data.method === "ticker";
 }
@@ -24,12 +22,15 @@ class HitBTCWebsocketClient {
             });
         };
         this.sendRequest = (method, params) => this.socket.send(this.createRequest(method, params));
-        this.addListener = (listener) => this.socket.addEventListener(`message`, withData(listener));
-        this.removeListener = (listener) => this.socket.removeEventListener(`message`, withData(listener));
-        this.addEventListener = (event, listener) => this.socket.addEventListener(event, listener);
-        this.removeEventListener = (event, listener) => this.socket.removeEventListener(event, listener);
-        this.addOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
-        this.removeOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
+        this.addListener = (listener) => this.socket.on(`message`, (data) => listener(JSON.parse(data)));
+        // public removeListener = (listener: Listener) =>
+        //   this.socket.removeEventListener(`message`, withData(listener))
+        this.addEventListener = (event, listener) => this.socket.on(event, listener);
+        // public removeEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
+        // this.socket.removeEventListener(event, listener)
+        this.addOnOpenListener = (listener) => this.socket.on(`open`, listener);
+        // public removeOnOpenListener = (listener: () => void) =>
+        //   this.socket.off(`open`, listener)
         // Custom code
         // Lets define some callbacks
         this.bindCallbacks = (callbacks) => {
@@ -102,11 +103,14 @@ class HitBTCWebsocketClient {
         const hasCredentials = !!(key && secret);
         this.requestId = 0;
         if (hasCredentials) {
-            const ReconnectingWebsocket = ReconnectingWS;
-            this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
-                WebSocket: WS,
+            this.socket = new nodeReconnectWs({
+                url: this.baseUrl,
+                protocol: [],
+                reconnectInterval: 4000,
+                autoConnect: true,
+                maxRetries: Infinity,
             });
-            this.addOnOpenListener(() => {
+            this.socket.on('open', () => {
                 this.sendRequest(`login`, {
                     algo: `BASIC`,
                     pKey: key,
