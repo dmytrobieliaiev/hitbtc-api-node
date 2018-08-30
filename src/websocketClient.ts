@@ -10,7 +10,8 @@ export type MessageListener = (event: MessageEvent) => void;
   
 
 interface ICallbacks {
-  onOrderBook?: Function;
+  onOrderBookSnapshot?: Function;
+  onOrderBookUpdate?: Function;
   onOrder?: Function;
   onTicker?: Function;
   onTrades?: Function;
@@ -191,13 +192,13 @@ export default class HitBTCWebsocketClient {
       }
       switch (method) {
         case 'updateOrderbook':
-          if (callbacks.onOrderBook) {
-            callbacks.onOrderBook(params);
+          if (callbacks.onOrderBookUpdate) {
+            callbacks.onOrderBookUpdate(params);
           }
           break;
         case 'snapshotOrderbook':
-          if (callbacks.onOrderBook) {
-            callbacks.onOrderBook(params);
+          if (callbacks.onOrderBookSnapshot) {
+            callbacks.onOrderBookSnapshot(params);
           }
           break;
         case 'snapshotTrades':

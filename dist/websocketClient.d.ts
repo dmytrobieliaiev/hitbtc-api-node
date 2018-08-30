@@ -2,7 +2,8 @@ export declare type Listener = (data: IWebsocketData) => void;
 export declare type EventListener = (...args: any[]) => void;
 export declare type MessageListener = (event: MessageEvent) => void;
 interface ICallbacks {
-    onOrderBook?: Function;
+    onOrderBookSnapshot?: Function;
+    onOrderBookUpdate?: Function;
     onOrder?: Function;
     onTicker?: Function;
     onTrades?: Function;

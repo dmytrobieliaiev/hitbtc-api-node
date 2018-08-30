@@ -52,13 +52,13 @@ class HitBTCWebsocketClient {
                 }
                 switch (method) {
                     case 'updateOrderbook':
-                        if (callbacks.onOrderBook) {
-                            callbacks.onOrderBook(params);
+                        if (callbacks.onOrderBookUpdate) {
+                            callbacks.onOrderBookUpdate(params);
                         }
                         break;
                     case 'snapshotOrderbook':
-                        if (callbacks.onOrderBook) {
-                            callbacks.onOrderBook(params);
+                        if (callbacks.onOrderBookSnapshot) {
+                            callbacks.onOrderBookSnapshot(params);
                         }
                         break;
                     case 'snapshotTrades':
