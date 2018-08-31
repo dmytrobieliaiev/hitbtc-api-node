@@ -130,8 +130,12 @@ class HitBTCWebsocketClient {
     subscribeTicker(pairs) {
         pairs.map(symbol => this.sendRequest('subscribeTicker', { symbol }));
     }
-    unsubscribeMarkets(pairs) {
-        pairs.map(symbol => this.sendRequest('unsubscribeOrderbook', { symbol }));
+    unsubscribeMarkets(symbols) {
+        symbols.map(symbol => {
+            this.sendRequest('unsubscribeOrderbook', { symbol });
+            this.sendRequest('unsubscribeTrades', { symbol });
+        });
+        this.subscriptions = this.subscriptions.filter(i => symbols.indexOf(i) < 0);
     }
     subscribeOrders() {
         this.sendRequest('subscribeReports', {});

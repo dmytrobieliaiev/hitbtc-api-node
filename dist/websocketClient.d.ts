@@ -83,7 +83,7 @@ export default class HitBTCWebsocketClient {
     bindCallbacks: (callbacks: ICallbacks) => void;
     subscribeMarkets(pairs: string[]): void;
     subscribeTicker(pairs: string[]): void;
-    unsubscribeMarkets(pairs: string[]): void;
+    unsubscribeMarkets(symbols: string[]): void;
     subscribeOrders(): void;
 }
 export {};

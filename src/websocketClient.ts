@@ -242,8 +242,12 @@ export default class HitBTCWebsocketClient {
   public subscribeTicker(pairs: string[]) {
     pairs.map(symbol => this.sendRequest('subscribeTicker', { symbol }));
   }
-  public unsubscribeMarkets(pairs: string[]) {
-    pairs.map(symbol => this.sendRequest('unsubscribeOrderbook', { symbol }));
+  public unsubscribeMarkets(symbols: string[]) {
+    symbols.map(symbol => {
+      this.sendRequest('unsubscribeOrderbook', { symbol });
+      this.sendRequest('unsubscribeTrades', { symbol });
+    });
+    this.subscriptions = this.subscriptions.filter(i => symbols.indexOf(i) < 0);
   }
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});
