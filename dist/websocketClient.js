@@ -121,9 +121,12 @@ class HitBTCWebsocketClient {
     }
     subscribeMarkets(pairs) {
         pairs.map(symbol => {
-            this.subscriptions.push(symbol);
-            this.sendRequest('subscribeOrderbook', { symbol }); // deltas
-            this.sendRequest('subscribeTrades', { symbol });
+            if (this.subscriptions.indexOf(symbol) < 0) { // skip subscription when we have it 
+                this.subscriptions.push(symbol);
+                console.log(`Subscribed ${symbol}`);
+                this.sendRequest('subscribeOrderbook', { symbol }); // deltas
+                this.sendRequest('subscribeTrades', { symbol });
+            }
         });
         this.subscriptions = ramda_1.uniq(this.subscriptions);
     }
