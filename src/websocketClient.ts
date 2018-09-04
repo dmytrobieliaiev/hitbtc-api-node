@@ -1,4 +1,5 @@
 import { uniq } from "ramda";
+import shortid from 'shortid';
 const nodeReconnectWs = require('node-reconnect-ws');
 
 export type Listener = (data: IWebsocketData) => void;
@@ -231,20 +232,22 @@ export default class HitBTCWebsocketClient {
       }
     });
   }
+
   public subscribeMarkets(pairs: string[]) {
     pairs.map(symbol => {
       if (this.subscriptions.indexOf(symbol) < 0) { // skip subscription when we have it 
-        this.subscriptions.push(symbol);
-        console.log(`Subscribed ${symbol}`);
+        this.subscriptions.push(symbol);+
         this.sendRequest('subscribeOrderbook', { symbol }); // deltas
         this.sendRequest('subscribeTrades', { symbol });
       }
     });
     this.subscriptions = uniq(this.subscriptions);
   }
+
   public subscribeTicker(pairs: string[]) {
     pairs.map(symbol => this.sendRequest('subscribeTicker', { symbol }));
   }
+
   public unsubscribeMarkets(symbols: string[]) {
     symbols.map(symbol => {
       this.sendRequest('unsubscribeOrderbook', { symbol });
@@ -252,7 +255,22 @@ export default class HitBTCWebsocketClient {
     });
     this.subscriptions = this.subscriptions.filter(i => symbols.indexOf(i) < 0);
   }
+
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});
+  }
+
+  public cancelOrder(clientOrderId: string) {
+    this.sendRequest('cancelOrder', { clientOrderId });
+  }
+  public createOrder(symbol: string, side: string, price: string, quantity: string, extend?: object) { 
+    const params = Object.assign({
+      clientOrderId: shortid.generate(),
+      symbol,
+      side,
+      price,
+      quantity
+    }, extend);
+    this.sendRequest('newOrder', params);
   }
 }
