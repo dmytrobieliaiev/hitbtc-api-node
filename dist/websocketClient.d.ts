@@ -85,5 +85,7 @@ export default class HitBTCWebsocketClient {
     subscribeTicker(pairs: string[]): void;
     unsubscribeMarkets(symbols: string[]): void;
     subscribeOrders(): void;
+    cancelOrder(clientOrderId: string): void;
+    createOrder(symbol: string, side: string, price: string, quantity: string, extend?: object): void;
 }
 export {};

@@ -1,5 +1,5 @@
 import { uniq } from "ramda";
-import shortid from 'shortid';
+const shortid = require('shortid');
 const nodeReconnectWs = require('node-reconnect-ws');
 
 export type Listener = (data: IWebsocketData) => void;

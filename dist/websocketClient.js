@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const ramda_1 = require("ramda");
+const shortid = require('shortid');
 const nodeReconnectWs = require('node-reconnect-ws');
 function isTickerMessage(data) {
     return data.method === "ticker";
@@ -123,8 +124,7 @@ class HitBTCWebsocketClient {
         pairs.map(symbol => {
             if (this.subscriptions.indexOf(symbol) < 0) { // skip subscription when we have it 
                 this.subscriptions.push(symbol);
-                console.log(`Subscribed ${symbol}`);
-                this.sendRequest('subscribeOrderbook', { symbol }); // deltas
+                +this.sendRequest('subscribeOrderbook', { symbol }); // deltas
                 this.sendRequest('subscribeTrades', { symbol });
             }
         });
@@ -142,6 +142,19 @@ class HitBTCWebsocketClient {
     }
     subscribeOrders() {
         this.sendRequest('subscribeReports', {});
+    }
+    cancelOrder(clientOrderId) {
+        this.sendRequest('cancelOrder', { clientOrderId });
+    }
+    createOrder(symbol, side, price, quantity, extend) {
+        const params = Object.assign({
+            clientOrderId: shortid.generate(),
+            symbol,
+            side,
+            price,
+            quantity
+        }, extend);
+        this.sendRequest('newOrder', params);
     }
 }
 exports.default = HitBTCWebsocketClient;
