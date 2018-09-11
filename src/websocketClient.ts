@@ -263,7 +263,6 @@ export default class HitBTCWebsocketClient {
 
   public getActiveOrders() {
     this.sendRequest('getOrders', {});
-    // this.sendRequest('activeOrders', {});
   }
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});

@@ -147,7 +147,6 @@ class HitBTCWebsocketClient {
     }
     getActiveOrders() {
         this.sendRequest('getOrders', {});
-        // this.sendRequest('activeOrders', {});
     }
     subscribeOrders() {
         this.sendRequest('subscribeReports', {});
