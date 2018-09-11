@@ -87,6 +87,6 @@ export default class HitBTCWebsocketClient {
     getActiveOrders(): void;
     subscribeOrders(): void;
     cancelOrder(clientOrderId: string): void;
-    createOrder(symbol: string, side: string, price: string, quantity: string, extend?: object): void;
+    createOrder(symbol: string, orderType: string, side: string, amount: string, price: string, extend?: object): void;
 }
 export {};

@@ -154,14 +154,16 @@ class HitBTCWebsocketClient {
     cancelOrder(clientOrderId) {
         this.sendRequest('cancelOrder', { clientOrderId });
     }
-    createOrder(symbol, side, price, quantity, extend) {
+    createOrder(symbol, orderType, side, amount, price, extend) {
+        const extendOptions = extend || {};
         const params = Object.assign({
             clientOrderId: shortid.generate(),
+            type: orderType,
             symbol,
             side,
             price,
-            quantity
-        }, extend);
+            quantity: amount
+        }, extendOptions);
         this.sendRequest('newOrder', params);
     }
 }
