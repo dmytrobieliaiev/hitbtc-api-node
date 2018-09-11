@@ -140,6 +140,9 @@ class HitBTCWebsocketClient {
         });
         this.subscriptions = this.subscriptions.filter(i => symbols.indexOf(i) < 0);
     }
+    getActiveOrders() {
+        this.sendRequest('getOrders', {});
+    }
     subscribeOrders() {
         this.sendRequest('subscribeReports', {});
     }

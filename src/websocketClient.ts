@@ -7,7 +7,7 @@ export type EventListener = (...args: any[]) => void;
 export type MessageListener = (event: MessageEvent) => void;
 
 // const withData = (listener: Listener): MessageListener => 
-//   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
+  // pipe(prop("data"), (data: string) => JSON.parse(data), listener);
   
 
 interface ICallbacks {
@@ -256,6 +256,9 @@ export default class HitBTCWebsocketClient {
     this.subscriptions = this.subscriptions.filter(i => symbols.indexOf(i) < 0);
   }
 
+  public getActiveOrders() {
+    this.sendRequest('getOrders', {});
+  }
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});
   }
