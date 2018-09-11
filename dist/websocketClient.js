@@ -77,7 +77,7 @@ class HitBTCWebsocketClient {
                             callbacks.onTicker(params);
                         }
                         break;
-                    case 'activeOrders':
+                    case 'getOrders':
                         if (callbacks.onActiveOrders) {
                             callbacks.onActiveOrders(params);
                         }
