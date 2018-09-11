@@ -222,6 +222,11 @@ export default class HitBTCWebsocketClient {
             callbacks.onActiveOrders(params);
           }
           break;
+        case 'activeOrders':
+          if (callbacks.onActiveOrders) {
+            callbacks.onActiveOrders(params);
+          }
+          break;
         case 'report':
           if (callbacks.onOrder) {
             callbacks.onOrder(params);
@@ -258,6 +263,7 @@ export default class HitBTCWebsocketClient {
 
   public getActiveOrders() {
     this.sendRequest('getOrders', {});
+    // this.sendRequest('activeOrders', {});
   }
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});
