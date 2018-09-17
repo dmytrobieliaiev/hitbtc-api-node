@@ -22,7 +22,28 @@ class HitBTCWebsocketClient {
                 id,
             });
         };
-        this.sendRequest = (method, params) => this.socket.send(this.createRequest(method, params));
+        /*
+        * If socket is offline, than add query to queue
+        * Push queue when socket is online
+        */
+        this.sendRequest = (method, params) => {
+            if (this.socket.readyState === this.socket.ws.OPEN) {
+                this.socket.send(this.createRequest(method, params));
+                // Reconnect behavior
+                if (this.isReconnecting) {
+                    this.isReconnecting = false;
+                    this.reconnectQueue.forEach(fn => fn(this));
+                    this.reconnectQueue = [];
+                }
+            }
+            else {
+                if (!this.isReconnecting) {
+                    this.isReconnecting = true;
+                }
+                const fn = (ctx) => ctx.socket.send(ctx.createRequest(method, params));
+                this.reconnectQueue.push(fn);
+            }
+        };
         this.addListener = (listener) => this.socket.on(`message`, (data) => listener(JSON.parse(data)));
         // public removeListener = (listener: Listener) =>
         //   this.socket.removeEventListener(`message`, withData(listener))

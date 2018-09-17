@@ -23,6 +23,8 @@ interface ICallbacks {
 interface ISocket {
   on: Function;
   send: Function;
+  readyState: number;
+  ws: WebSocket;
 }
 
 export interface IWebsocketParams {
@@ -107,6 +109,8 @@ export default class HitBTCWebsocketClient {
   public socket: ISocket;
   private requestId: number;
   private responseId: number;
+  public isReconnecting: boolean;
+  public reconnectQueue: Function[];
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
     this.subscriptions = [];
@@ -151,8 +155,27 @@ export default class HitBTCWebsocketClient {
     });
   }
 
-  public sendRequest = (method: string, params: any) =>
-    this.socket.send(this.createRequest(method, params))
+  /*
+  * If socket is offline, than add query to queue
+  * Push queue when socket is online
+  */
+  public sendRequest = (method: string, params: any) => {
+    if (this.socket.readyState === this.socket.ws.OPEN) {
+      this.socket.send(this.createRequest(method, params));
+      // Reconnect behavior
+      if (this.isReconnecting) {
+        this.isReconnecting = false;
+        this.reconnectQueue.forEach(fn => fn(this));
+        this.reconnectQueue = [];
+      }
+    } else {
+      if (!this.isReconnecting) {
+        this.isReconnecting = true;
+      }
+      const fn = (ctx: HitBTCWebsocketClient) => ctx.socket.send(ctx.createRequest(method, params));
+      this.reconnectQueue.push(fn);
+    }
+  }
 
   public addListener = (listener: Listener) =>
     this.socket.on(`message`, (data: string) => listener(JSON.parse(data)));

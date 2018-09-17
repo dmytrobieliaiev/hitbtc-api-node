@@ -14,6 +14,8 @@ interface ICallbacks {
 interface ISocket {
     on: Function;
     send: Function;
+    readyState: number;
+    ws: WebSocket;
 }
 export interface IWebsocketParams {
     readonly key: string;
@@ -74,9 +76,11 @@ export default class HitBTCWebsocketClient {
     socket: ISocket;
     private requestId;
     private responseId;
+    isReconnecting: boolean;
+    reconnectQueue: Function[];
     constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
     createRequest: (method: string, params?: {}) => string;
-    sendRequest: (method: string, params: any) => any;
+    sendRequest: (method: string, params: any) => void;
     addListener: (listener: Listener) => any;
     addEventListener: (event: "error" | "message" | "close" | "open", listener: EventListener) => any;
     addOnOpenListener: (listener: () => void) => any;
