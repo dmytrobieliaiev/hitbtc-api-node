@@ -44,7 +44,17 @@ class HitBTCWebsocketClient {
                 this.reconnectQueue.push(fn);
             }
         };
-        this.addListener = (listener) => this.socket.on(`message`, (data) => listener(JSON.parse(data)));
+        this.addListener = (listener) => this.socket.on(`message`, (data) => {
+            try {
+                if (data) {
+                    const obj = JSON.parse(data);
+                    listener(obj);
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        });
         // public removeListener = (listener: Listener) =>
         //   this.socket.removeEventListener(`message`, withData(listener))
         this.addEventListener = (event, listener) => this.socket.on(event, listener);

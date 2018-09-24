@@ -7,7 +7,7 @@ export type EventListener = (...args: any[]) => void;
 export type MessageListener = (event: MessageEvent) => void;
 
 // const withData = (listener: Listener): MessageListener => 
-  // pipe(prop("data"), (data: string) => JSON.parse(data), listener);
+//   pipe(prop("data"), (data: string) => JSON.parse(data), listener);
   
 
 interface ICallbacks {
@@ -180,7 +180,16 @@ export default class HitBTCWebsocketClient {
   }
 
   public addListener = (listener: Listener) =>
-    this.socket.on(`message`, (data: string) => listener(JSON.parse(data)));
+    this.socket.on(`message`, (data: string) => {
+      try {
+        if (data) {
+          const obj = JSON.parse(data);
+          listener(obj);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    })
 
   // public removeListener = (listener: Listener) =>
   //   this.socket.removeEventListener(`message`, withData(listener))
