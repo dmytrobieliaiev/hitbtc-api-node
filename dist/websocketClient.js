@@ -119,6 +119,7 @@ class HitBTCWebsocketClient {
             });
         };
         this.subscriptions = [];
+        this.reconnectQueue = [];
         this.responseId = 0;
         if (baseUrl) {
             this.baseUrl = baseUrl;
