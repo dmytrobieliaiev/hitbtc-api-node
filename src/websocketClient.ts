@@ -114,6 +114,7 @@ export default class HitBTCWebsocketClient {
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
     this.subscriptions = [];
+    this.reconnectQueue = [];
     this.responseId = 0;
 
     if (baseUrl) {
