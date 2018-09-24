@@ -115,6 +115,7 @@ export default class HitBTCWebsocketClient {
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
     this.subscriptions = [];
     this.reconnectQueue = [];
+    this.isReconnecting = false;
     this.responseId = 0;
 
     if (baseUrl) {
@@ -161,7 +162,7 @@ export default class HitBTCWebsocketClient {
   * Push queue when socket is online
   */
   public sendRequest = (method: string, params: any) => {
-    if (this.socket.readyState === this.socket.ws.OPEN) {
+    if (this.socket.ws.readyState === this.socket.ws.OPEN) {
       this.socket.send(this.createRequest(method, params));
       // Reconnect behavior
       if (this.isReconnecting) {
