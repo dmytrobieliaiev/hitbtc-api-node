@@ -11,22 +11,39 @@ export type MessageListener = (event: MessageEvent) => void;
   
 
 interface ICallbacks {
-  onOrderBookSnapshot?: Function;
-  onOrderBookUpdate?: Function;
-  onOrder?: Function;
-  onTicker?: Function;
-  onTrades?: Function;
-  onTradingBalance?: Function;
-  onActiveOrders?: Function;
-  onError?: Function;
-  onReady?: Function;
+  [key:string]: any;
+  onOrderBookSnapshot: Function;
+  onOrderBookUpdate: Function;
+  onOrder: Function;
+  onTicker: Function;
+  onTrades: Function;
+  onTradingBalance: Function;
+  onActiveOrders: Function;
+  onError: Function;
+  onReady: Function;
 }
+export const responseCallbackMatch: Hash<string> = {
+  updateOrderbook: 'onOrderBookUpdate',
+  snapshotOrderbook: 'onOrderBookSnapshot',
+  snapshotTrades: 'onTrades',
+  updateTrades: 'onTrades',
+  ticker: 'onTicker',
+  getOrders:  'onActiveOrders',
+  getTradingBalance: 'onTradingBalance',
+  activeOrders: 'onActiveOrders',
+  report: 'onOrder'
+};
 interface ISocket {
   on: Function;
   send: Function;
   readyState: number;
   ws: WebSocket;
 }
+
+interface Hash<T> {
+  [key: string]: T;
+}
+
 
 export interface IWebsocketParams {
   readonly key: string;
@@ -112,11 +129,13 @@ export default class HitBTCWebsocketClient {
   private responseId: number;
   public isReconnecting: boolean;
   public reconnectQueue: Function[];
+  public responseQueue: Hash<string>;
 
   constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
     this.subscriptions = [];
     this.reconnectQueue = [];
     this.isReconnecting = false;
+    this.responseQueue = {};
     this.responseId = 0;
 
     if (baseUrl) {
@@ -148,9 +167,14 @@ export default class HitBTCWebsocketClient {
     }
   }
 
+  public syncMethods: string[] = ['getTradingBalance', 'getOrders', 'newOrder', 'cancelOrder'];
+  
   public createRequest = (method: string, params = {}) => {
     const id = this.requestId;
     this.requestId += 1;
+    if (this.syncMethods.indexOf(method) > -1) {
+      this.responseQueue[id] = method;
+    } 
     return JSON.stringify({
       method,
       params,
@@ -192,31 +216,33 @@ export default class HitBTCWebsocketClient {
       }
     })
 
-  // public removeListener = (listener: Listener) =>
-  //   this.socket.removeEventListener(`message`, withData(listener))
-
   public addEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
     this.socket.on(event, listener)
-
-  // public removeEventListener = (event: keyof WebSocketEventMap, listener: EventListener) =>
-    // this.socket.removeEventListener(event, listener)
 
   public addOnOpenListener = (listener: () => void) =>
     this.socket.on(`open`, listener)
 
-  // public removeOnOpenListener = (listener: () => void) =>
-  //   this.socket.off(`open`, listener)
-  
   // Custom code
   // Lets define some callbacks
   public bindCallbacks = (callbacks: ICallbacks) => {
     this.addListener((data) => {
-      const isError = (data && data.error);
-      const method = data && data.method;
-      const params = data && data.params;
+      const isError = data && data.error;
+      let method = data && data.method;
+      const params = data && (data.params || data.result);
       if (isError && callbacks.onError) {
         callbacks.onError(JSON.stringify(data.error));
+        return;
       }
+      // Rebound response
+      const messageId = data.id;
+      if (messageId) {
+        const boundMethod = this.responseQueue[messageId];
+        if (boundMethod) {
+          method = boundMethod;
+          delete this.responseQueue[messageId];
+        }
+      }
+      // .onReady callback
       if (callbacks.onReady) {
         this.responseId += 1;
         if (this.responseId === 1){
@@ -226,53 +252,13 @@ export default class HitBTCWebsocketClient {
           this.responseId = 2;
         }
       }
-      switch (method) {
-        case 'updateOrderbook':
-          if (callbacks.onOrderBookUpdate) {
-            callbacks.onOrderBookUpdate(params);
-          }
-          break;
-        case 'snapshotOrderbook':
-          if (callbacks.onOrderBookSnapshot) {
-            callbacks.onOrderBookSnapshot(params);
-          }
-          break;
-        case 'snapshotTrades':
-          if (callbacks.onTrades) {
-            callbacks.onTrades(params);
-          }
-          break;
-        case 'updateTrades':
-          if (callbacks.onTrades) {
-            callbacks.onTrades(params);
-          }
-          break;
-        case 'ticker':
-          if (callbacks.onTicker) {
-            callbacks.onTicker(params);
-          }
-          break;
-        case 'getOrders':
-          if (callbacks.onActiveOrders) {
-            callbacks.onActiveOrders(params);
-          }
-          break;
-        case 'getTradingBalance':
-          if (callbacks.onTradingBalance) {
-            callbacks.onTradingBalance(params);
-          }
-        case 'activeOrders':
-          if (callbacks.onActiveOrders) {
-            callbacks.onActiveOrders(params);
-          }
-          break;
-        case 'report':
-          if (callbacks.onOrder) {
-            callbacks.onOrder(params);
-          }
-          break;
-        default:
-          break;
+  
+      // Process methods
+      if (method && responseCallbackMatch.hasOwnProperty(method)) {
+        const callbackName: string = responseCallbackMatch[method];
+        if (callbacks.hasOwnProperty(callbackName)){
+          callbacks[callbackName](params);
+        };
       }
     });
   }

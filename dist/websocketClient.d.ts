@@ -2,21 +2,26 @@ export declare type Listener = (data: IWebsocketData) => void;
 export declare type EventListener = (...args: any[]) => void;
 export declare type MessageListener = (event: MessageEvent) => void;
 interface ICallbacks {
-    onOrderBookSnapshot?: Function;
-    onOrderBookUpdate?: Function;
-    onOrder?: Function;
-    onTicker?: Function;
-    onTrades?: Function;
-    onTradingBalance?: Function;
-    onActiveOrders?: Function;
-    onError?: Function;
-    onReady?: Function;
+    [key: string]: any;
+    onOrderBookSnapshot: Function;
+    onOrderBookUpdate: Function;
+    onOrder: Function;
+    onTicker: Function;
+    onTrades: Function;
+    onTradingBalance: Function;
+    onActiveOrders: Function;
+    onError: Function;
+    onReady: Function;
 }
+export declare const responseCallbackMatch: Hash<string>;
 interface ISocket {
     on: Function;
     send: Function;
     readyState: number;
     ws: WebSocket;
+}
+interface Hash<T> {
+    [key: string]: T;
 }
 export interface IWebsocketParams {
     readonly key: string;
@@ -79,7 +84,9 @@ export default class HitBTCWebsocketClient {
     private responseId;
     isReconnecting: boolean;
     reconnectQueue: Function[];
+    responseQueue: Hash<string>;
     constructor({ key, secret, isDemo, baseUrl }: IWebsocketParams);
+    syncMethods: string[];
     createRequest: (method: string, params?: {}) => string;
     sendRequest: (method: string, params: any) => void;
     addListener: (listener: Listener) => any;
