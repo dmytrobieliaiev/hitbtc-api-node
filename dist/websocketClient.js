@@ -113,6 +113,10 @@ class HitBTCWebsocketClient {
                             callbacks.onActiveOrders(params);
                         }
                         break;
+                    case 'getTradingBalance':
+                        if (callbacks.onTradingBalance) {
+                            callbacks.onTradingBalance(params);
+                        }
                     case 'activeOrders':
                         if (callbacks.onActiveOrders) {
                             callbacks.onActiveOrders(params);
@@ -180,6 +184,9 @@ class HitBTCWebsocketClient {
     }
     getActiveOrders() {
         this.sendRequest('getOrders', {});
+    }
+    getTradingBalance() {
+        this.sendRequest('getTradingBalance', {});
     }
     subscribeOrders() {
         this.sendRequest('subscribeReports', {});

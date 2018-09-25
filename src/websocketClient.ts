@@ -16,6 +16,7 @@ interface ICallbacks {
   onOrder?: Function;
   onTicker?: Function;
   onTrades?: Function;
+  onTradingBalance?: Function;
   onActiveOrders?: Function;
   onError?: Function;
   onReady?: Function;
@@ -256,6 +257,10 @@ export default class HitBTCWebsocketClient {
             callbacks.onActiveOrders(params);
           }
           break;
+        case 'getTradingBalance':
+          if (callbacks.onTradingBalance) {
+            callbacks.onTradingBalance(params);
+          }
         case 'activeOrders':
           if (callbacks.onActiveOrders) {
             callbacks.onActiveOrders(params);
@@ -297,6 +302,9 @@ export default class HitBTCWebsocketClient {
 
   public getActiveOrders() {
     this.sendRequest('getOrders', {});
+  }
+  public getTradingBalance() {
+    this.sendRequest('getTradingBalance', {});
   }
   public subscribeOrders() {
     this.sendRequest('subscribeReports', {});

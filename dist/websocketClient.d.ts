@@ -7,6 +7,7 @@ interface ICallbacks {
     onOrder?: Function;
     onTicker?: Function;
     onTrades?: Function;
+    onTradingBalance?: Function;
     onActiveOrders?: Function;
     onError?: Function;
     onReady?: Function;
@@ -89,6 +90,7 @@ export default class HitBTCWebsocketClient {
     subscribeTicker(pairs: string[]): void;
     unsubscribeMarkets(symbols: string[]): void;
     getActiveOrders(): void;
+    getTradingBalance(): void;
     subscribeOrders(): void;
     cancelOrder(clientOrderId: string): void;
     createOrder(symbol: string, orderType: string, side: string, amount: string, price: string, extend?: object): void;
