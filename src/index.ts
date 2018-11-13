@@ -118,7 +118,7 @@ export default class HitBTC {
   public fee = (symbol: string) =>
     this.requestPrivate(`/trading/fee/${symbol}`, {}, `get`)
 
-  public orderHistory = (params: any) =>
+  public orderHistory = (params?: any) =>
     this.requestPrivate(`/history/order`, params, `get`)
 
   public tradesHistory = (params: any) =>

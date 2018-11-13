@@ -32,7 +32,7 @@ export default class HitBTC {
     }) => Promise<IOrder[]>;
     cancelOrder: (clientOrderId: string) => Promise<IOrder>;
     fee: (symbol: string) => Promise<any>;
-    orderHistory: (params: any) => Promise<any>;
+    orderHistory: (params?: any) => Promise<any>;
     tradesHistory: (params: any) => Promise<any>;
     tradesByOrder: (orderId: string) => Promise<any>;
     accountBalance: () => Promise<any>;
